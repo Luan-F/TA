@@ -1,9 +1,10 @@
+const key_path = './keys.json';
 const fs = require('fs');
 
 document.addEventListener('keydown', ({ code }) => {
 	console.log(code);
 
-	let currentKey = code.trim().toLowerCase().replace('arrow', '');
+	let currentKey = code.trim().toLowerCase().replace(/arrow|key|digit/, '');
 
 	let keyDocument = document.getElementById(currentKey);
 
@@ -14,8 +15,8 @@ document.addEventListener('keydown', ({ code }) => {
 
 document.addEventListener('keyup', ({ code }) => {
 	console.log(code);
-
-	let currentKey = code.trim().toLowerCase().replace('arrow', '');
+	
+	let currentKey = code.trim().toLowerCase().replace(/arrow|key|digit/, '');
 
 	let keyDocument = document.getElementById(currentKey);
 
@@ -36,9 +37,7 @@ const update = (key, color) => {
 	document.getElementById(key).style.backgroundColor = color;
 };
 
-var keysEvent = fs.createReadStream('./keys.json');
-
-fs.watchFile('./keys.json', (filename, event) => {
+fs.watchFile(key_path, (filename, event) => {
 	let keys = JSON.parse(fs.readFileSync('./keys.json').toString());
 	console.log(keys, filename, event);
 	for(let keyName in keys){
@@ -50,5 +49,3 @@ fs.watchFile('./keys.json', (filename, event) => {
 		update(keyName, color);
 	}
 });
-
-update('enter', 'blue');

@@ -38,14 +38,14 @@ def tempoPressionado(botao, botao_anterior):
 	return False
 
 #
-def atualizaKey(key):
+def atualizaKey(key, valor = True):
 	keysValues = {}
 
 	keys = open('keys.json', 'r')
 	keysValues = json.load(keys)
 	keys.close()
 
-	keysValues[key] = True
+	keysValues[key] = valor
 	print(keysValues)
 
 	keys = open('keys.json', 'w')
@@ -62,6 +62,7 @@ def comando(tempo):
 	for key in dados:
 		t1, t2 = dados[key]
 		if tempo > t1 and tempo <= t2:
+			atualizaKey(key, False)
 			tecla = key
 			atualizaKey(key)
 			break
