@@ -38,9 +38,9 @@ const update = (key, color) => {
 
 var keysEvent = fs.createReadStream('./keys.json');
 
-keysEvent.on('end', () => {
+fs.watchFile('./keys.json', (filename, event) => {
 	let keys = JSON.parse(fs.readFileSync('./keys.json').toString());
-	console.log(keys);
+	console.log(keys, filename, event);
 	for(let keyName in keys){
 		let color = '';
 		console.log(keys[keyName])

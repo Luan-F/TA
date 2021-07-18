@@ -16,4 +16,4 @@ def atualizaKey(key):
 
 	print(keysValues)
 
-atualizaKey('left')
+atualizaKey('right')
