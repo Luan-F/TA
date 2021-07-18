@@ -8,7 +8,7 @@
 				background-color: whitesmoke;
 			}
 			div {
-				margin: 10%;
+				margin: 5px;
 			}
 			div.main {
 				display: flex;
@@ -16,21 +16,19 @@
 				align-items: center;
 			}
 			div.card {
-				font-size: 64px;
+				border-radius: 5px;
+				font-size: 20px;
+				border-style: solid;
+				width: 7.5%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
 			}
 		</style>
 	</head>
 	<body>
-		<div class="main">
-			<div class="card" id="left">left</div>
-			<div>
-				<div class="card" id="up">up</div>
-				<br>
-				<div class="card" id="down">down</div>
-			</div>
-			<div class="card" id="right">right</div>
+		<div class="main" id="main">
 		</div>
-
 		<script src="app.js"></script>
 	</body>
 </html>

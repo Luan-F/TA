@@ -49,23 +49,37 @@ function saveValues(limite = 1){
 
 function createConfigFile(){
 	saveValues(0);
-	let config = '{'
+	let config = '{\n';
+	let keys = '{\n';
 	let i;
 	console.log(values)
 	for(i = 0 ; i < itens.length-1 ; i++){
-		config += `"${itens[i]}": [${values[i][0]},${values[i][1]}],`
+		config += `\t"${itens[i]}": [${values[i][0]},${values[i][1]}],\n`
+		keys += `\t"${itens[i]}": false,\n`;
 	}
-	config += `"${itens[i]}": [${values[i][0]},${values[i][1]}]}`;
+	if(i > 0){
+		config += `\t"${itens[i]}": [${values[i][0]},${values[i][1]}]`;
+		keys += `\t"${itens[i]}": false`;
+	}
+	keys += '\n}';
+	config += '\n}';
 	
 	// Write a file in this json
-	fs.writeFileSync("config.json", config);
+	fs.writeFile("config.json", config, (err) => {
+		if(err){
+			throw err;
+		}
+	});
+	fs.writeFile("keys.json", keys, (err) => {
+		if(err){
+			throw err;
+		}
+	});
 };
 
 updateKey();
 
-
 function addKey(){
-	console.log('teste');
 	let newItem = document.getElementById('newKey');
 	let item = newItem.value;
 
