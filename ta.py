@@ -4,104 +4,141 @@ import time
 import pyautogui
 import json
 
-# Variáveis usadas
-valor_botao = 62
-c = 0
-entrada_antiga = tempo = 0
-lastCommand = 'enter'
+# #TODO refatorar para usar classes
+class Btn:
+	def __init__(self) -> None:
+		
+		self.valor_botao = 48
+		self.entrada_antiga = 0
+		self.tempo = 0
+		self.lastCommand = ''
+		self.lastSelected = ''
 
-dados = {}
-maior = 3000
+		self.dados = {}
+		self.maior = 3000
 
-with open('config.json', 'r') as config:
-	dados = json.load(config)
-	for i in dados:
-		if dados[i][1] > maior:
-			maior = dados[i][1]
+		with open('config.json', 'r') as config:
+			self.dados = json.load(config)
+			for i in self.dados:
+				if self.dados[i][1] > self.maior:
+					self.maior = self.dados[i][1]
+
+					keys = open('keys.json', 'r')
+
+		keys = open('keys.json', 'r')
+		keysValues = json.load(keys)
+		keys.close()
+
+		for key in keysValues['keysConfig']:
+			keysValues['keysConfig'][key] = False
+		keysValues['lastSelected'] = ""
+
+		keys = open('keys.json', 'w')
+		json.dump(keysValues, keys)
+		keys.close()
+
+	# Atualiza o nome da última tecla pressionada (no keys.json)
+	def __atualizaKeyLast(self) -> None:
+		keysValues = {}
+
+		keys = open('keys.json', 'r')
+		keysValues = json.load(keys)
+		keys.close()
+
+		keysValues['lastSelected'] = self.lastCommand
+
+		keys = open('keys.json', 'w')
+		json.dump(keysValues, keys)
+		keys.close()
+
+	# Atualiza a chave no keys.json
+	def __atualizaKeyConfig(self, key, valor = True) -> None:
+		if key == '':
+			return
+
+		keysValues = {}
+
+		keys = open('keys.json', 'r')
+		keysValues = json.load(keys)
+		keys.close()
+
+		keysValues['keysConfig'][key] = valor
+
+		keys = open('keys.json', 'w')
+		json.dump(keysValues, keys)
+		keys.close()
+		
+	# Atualiza a tecla no json
+	def __updateCurrentKey(self, dt) -> str:
+		if dt > self.maior:
+			if self.lastCommand != self.lastSelected:
+				self.__atualizaKeyConfig(self.lastCommand)
+			return self.lastCommand
+
+		for key in self.dados:
+			t1, t2 = self.dados[key]
+			if dt > t1 and dt <= t2:
+				if self.lastSelected != '':
+					self.__atualizaKeyConfig(self.lastSelected, False)
+				self.__atualizaKeyConfig(key)
+				self.lastSelected = key
+				break
+
+		return self.lastSelected
+
+	# Contador do tempo
+	def tempoPressionado(self, botao, botao_anterior) -> bool:
+		dt = ms() - self.tempo
+
+		if botao == self.valor_botao and botao_anterior != self.valor_botao:
+			self.tempo = ms()
+		elif botao != self.valor_botao and botao_anterior == self.valor_botao and dt <= self.maior:
+			return True
+		elif botao == self.valor_botao and dt > self.maior and self.lastCommand != '':
+			print(f'{self.lastCommand} | {dt} | {self.maior}')
+			self.__atualizaKeyConfig(self.lastSelected, False)
+			pyautogui.press(self.lastCommand)
+		elif botao == self.valor_botao and botao == botao_anterior:
+			self.__updateCurrentKey(dt)
+
+		return False
+
+
+	# Aperta uma teclada de acordo com o tempo
+	def comando(self, tempo) -> None:
+
+		tecla = self.__updateCurrentKey(tempo)
+
+		print(f'---{tecla}')
+		pyautogui.press(tecla)
+		self.lastCommand = tecla
+		self.__atualizaKeyLast()
+		self.tempo = 0
 
 # Tempo em milisegundos
 def ms():
 	return round(time.time()*1000)
 
-# Contador do tempo
-def tempoPressionado(botao, botao_anterior):
-	global tempo, lastCommand
-	dt = ms() - tempo
-	if botao == valor_botao and botao_anterior != valor_botao:
-		tempo = ms()
-	elif botao != valor_botao and botao_anterior == valor_botao:
-		return True
-	elif botao == valor_botao and dt > maior:	
-		print(lastCommand)
-		pyautogui.press(lastCommand)
-
-	return False
-
-#
-def atualizaKey(key, valor = True):
-	keysValues = {}
-
-	keys = open('keys.json', 'r')
-	keysValues = json.load(keys)
-	keys.close()
-
-	keysValues[key] = valor
-	print(keysValues)
-
-	keys = open('keys.json', 'w')
-	json.dump(keysValues, keys)
-	keys.close()
-
-	print(keysValues)
-
-# Aperta uma teclada de acordo com o tempo
-def comando(tempo):
-	global lastCommand
-	tecla = lastCommand
-
-	for key in dados:
-		t1, t2 = dados[key]
-		if tempo > t1 and tempo <= t2:
-			atualizaKey(key, False)
-			tecla = key
-			atualizaKey(key)
-			break
-
-	# if tecla == lastCommand and tempo > dados[tecla][1]:
-	# 	return
-
-	# if tempo <= 1000:
-	# 	tecla = 'enter'
-	# elif tempo > 1000 and tempo <= 2000:
-	# 	tecla = 'left'
-	# elif tempo > 2000 and tempo <= 3000:
-	# 	tecla = 'right'
-	# else:
-	# 	return
-
-	print(tecla)
-	pyautogui.press(tecla)
-	lastCommand = tecla
-
 # Setup
+entrada_antiga = 0
 ser = serial.Serial('/dev/ttyUSB0', 9600)
 time.sleep(1.5)
 print(ser.port)
 
-while 1:
-	c += 1
-	
+ta = Btn()
+
+while 1:	
 	entrada = str(ser.readline().decode().strip('\r\n'))
-	print(entrada)
+	# print(entrada)
 	if entrada != '':
 		entrada = int(entrada)
 
-	res = tempoPressionado(entrada, entrada_antiga)
+	# res = tempoPressionado(entrada, entrada_antiga)
+	res = ta.tempoPressionado(entrada, entrada_antiga)
 
-	if res:
-		dt = ms() - tempo
-		print(dt)
-		comando(dt)
+	if ta.tempo > 0 and res:
+		dt = ms() - ta.tempo
+		ta.comando(dt)
 
 	time.sleep(0.001)
 	entrada_antiga = entrada
