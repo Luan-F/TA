@@ -7,6 +7,9 @@ let last = document.getElementById('last');
 last.innerHTML = lastSelected;
 
 for(let key in keysConfig){
+	if(key === 'lastCommand'){
+		continue;
+	}
 	main.innerHTML += `<div id=${key} class="card">${key}</div>`;
 }
 
@@ -19,13 +22,16 @@ fs.watch(key_path, (curr, event) => {
 	// console.log(fs.readFileSync(key_path).toJSON())
 	let { keysConfig, lastSelected } = JSON.parse(fs.readFileSync(key_path).toString());
 	console.log(keysConfig, lastSelected, curr, event);
-	let selecteds = false;
+	// let selecteds = false;
 	for(let keyName in keysConfig){
+		if(keyName === 'lastCommand'){
+			continue;
+		}
 		let color = '';
 		// console.log(keysConfig[keyName])
 		if(keysConfig[keyName]){
 			color = 'red';
-			selecteds = true;
+			// selecteds = true;
 		}
 		update(keyName, color);
 	}
@@ -34,12 +40,25 @@ fs.watch(key_path, (curr, event) => {
 		last.innerHTML = lastSelected;
 	}
 
-	console.log(`=======>${selecteds}`)
-	if(!selecteds){
+	if(keysConfig['lastCommand']){
 		update('last', 'red');
-		// return;
 	}
 	else{
-		update('last', '')
+		update('last', '');
 	}
+
+	// console.log(`=======>${selecteds}`)
+	// if(keysCon['lastSelected']){
+	// 	update('last', 'red');
+	// 	// return;
+	// }
+	// else{
+	// 	update('last', '')
+	// }fig['lastSelected']){
+	// 	update('last', 'red');
+	// 	// return;
+	// }
+	// else{
+	// 	update('last', '')
+	// }
 });

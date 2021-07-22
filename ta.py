@@ -1,6 +1,5 @@
 import serial
 import time
-# from datetime import datetime
 import pyautogui
 import json
 
@@ -91,12 +90,14 @@ class Btn:
 		dt = ms() - self.tempo
 
 		if botao == self.valor_botao and botao_anterior != self.valor_botao:
+			self.__atualizaKeyConfig('lastCommand', False)
 			self.tempo = ms()
 		elif botao != self.valor_botao and botao_anterior == self.valor_botao and dt <= self.maior:
 			return True
 		elif botao == self.valor_botao and dt > self.maior and self.lastCommand != '':
-			print(f'{self.lastCommand} | {dt} | {self.maior}')
+			print(f'{self.lastCommand}')
 			self.__atualizaKeyConfig(self.lastSelected, False)
+			self.__atualizaKeyConfig('lastCommand')
 			pyautogui.press(self.lastCommand)
 		elif botao == self.valor_botao and botao == botao_anterior:
 			self.__updateCurrentKey(dt)
